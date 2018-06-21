@@ -19,13 +19,12 @@ PizzaFactory
 (Concrete Factory) NYPizzaFactory
 (Concrete Factory) ChicagiPizzaFactory
 Pizza
-NYCheesePizza
-ChicagoCheesePizza
-NYVeggiePizza
-ChicagoClamPizza
+CheesePizza
+VeggiePizza
+ClamPizza
 
 實際執行成果
-This is NYCheesePizza
+This is CheesePizza
 This is base Dough
 This is ThickDough
 NYIngredientFactory use dough
@@ -50,20 +49,19 @@ class IngredientFactory
 {
   public:
     Dough* dough;
-    virtual Dough* setDough(Dough* dough)=0;
-
+    virtual Dough* prepareDough() = 0;
 };
 
 
 
 class NYIngredientFactory:public IngredientFactory {
 public:
-  Dough* setDough(Dough* dough);
+  Dough* prepareDough();
 };
 
-Dough* NYIngredientFactory::setDough(Dough *dough)
+Dough *NYIngredientFactory::prepareDough()
 {
-    this->dough = dough;
+    this->dough = new ThickDough();
     std::cout << "NYIngredientFactory use dough" << std::endl;
     return dough;
 }
@@ -85,10 +83,12 @@ void Pizza::wrap()
     std::cout << "wrap pizza" << std::endl;
 }
 
-class NYCheesePizza : public Pizza {
+class CheesePizza : public Pizza {
     public:
-      NYCheesePizza(){
-          std::cout << "This is NYCheesePizza" << std::endl;
+      CheesePizza(IngredientFactory *ingredientFactory)
+      {
+          std::cout << "This is CheesePizza" << std::endl;
+          ingredientFactory->prepareDough();
       }
 };
 
@@ -106,16 +106,17 @@ class NYPizzaFactory : public PizzaFactory {
 
 Pizza* NYPizzaFactory::createPizza(std::string type) {
     Pizza* pizza;
+    IngredientFactory *nyIngredientFactory = new NYIngredientFactory();
     if (type == "cheese")
     {
-        pizza = new NYCheesePizza();
+        pizza = new CheesePizza(nyIngredientFactory);
         /* 
         原版的寫法是不建立 NYCheesePizza class, 而是 Chiacgo 和 NY 共用 CheesePizza class,
         然後 CheesePizza 的建構式中傳入參數 Ingredient class
+        然後綁死 NYIngredient factory 只能產生 Thick 麵團
         */
     }
-    IngredientFactory *nyIngredientFactory = new NYIngredientFactory();
-    pizza->dough = nyIngredientFactory->setDough(new ThickDough);
+    
     
 
     return pizza;
