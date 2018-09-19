@@ -6,7 +6,7 @@ using namespace std;
 
 class ITrack
 {
-	virtual string getData()=0;
+	virtual string getData() { return ""; };
 };
 
 class H264 :public ITrack
@@ -38,42 +38,62 @@ public:
 class RTSPServer
 {
 public:
-	ITrack* createTrack(string trackType);
+	virtual ITrack* createTrack();
 };
 
-ITrack* RTSPServer::createTrack(string trackType)
+
+ITrack* RTSPServer::createTrack()
 {
-	if (trackType == "h264")
-	{
+	ITrack *track = new ITrack();
+	return track;
+
+}
+
+class H264RTSPServer :public RTSPServer {
+public:
+	typedef RTSPServer super;
+	ITrack* createTrack() {
 		H264 *h264 = new H264();
 		h264->setBitrate(12);
 		cout << h264->getData() << endl;
 		return h264;
 	}
-	else if (trackType == "aac")
-	{
+};
+
+class AACRTSPServer :public RTSPServer {
+public:
+	typedef RTSPServer super;
+	ITrack* createTrack() {
 		AAC *aac = new AAC();
 		cout << aac->getData() << endl;
 		return aac;
 	}
-	else if (trackType == "xml")
-	{
+};
+
+class XMLRTSPServer :public RTSPServer {
+public:
+	typedef RTSPServer super;
+	ITrack* createTrack() {
 		XML *xml = new XML();
 		cout << xml->getData() << endl;
 		return xml;
 	}
-	
-}
+};
+
 
 int main(int argc, char* argv[])
 {
 
-	RTSPServer rtspServer;
+	RTSPServer *rtspServer = new H264RTSPServer();
+	rtspServer->createTrack();
 
-	ITrack *h264_aac = rtspServer.createTrack("h264");
-	h264_aac = rtspServer.createTrack("aac");
+	rtspServer = new AACRTSPServer();
+	rtspServer->createTrack();
 
-	//rtspServer.start();
+	rtspServer = new XMLRTSPServer();
+	rtspServer->createTrack();
+
+
 
 	system("pause");
 	return 0;
