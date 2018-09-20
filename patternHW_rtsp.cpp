@@ -49,19 +49,19 @@ public:
 	virtual void showTrack();
 
 private:
-	ITrack * m_track;
 	vector<ITrack *> trackList;
 };
 
 RTSPServer::RTSPServer(ITrack* track)
 {
-	m_track = track;
 	trackList.push_back(track);
 }
 
 RTSPServer::~RTSPServer()
 {
-	delete m_track;
+	for (const auto& track : trackList) {
+		delete track;
+	}
 
 }
 
