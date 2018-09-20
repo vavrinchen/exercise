@@ -1,12 +1,14 @@
 #include <string>  
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
 
 class ITrack
 {
-	virtual string getData() { return ""; };
+public:
+	virtual string getData() = 0;
 };
 
 class H264 :public ITrack
@@ -38,62 +40,42 @@ public:
 class RTSPServer
 {
 public:
-	virtual ITrack* createTrack();
+	RTSPServer(ITrack* track);
+	void createTrack(ITrack* track);
+	void showTrack();
+
+private:
+	vector<ITrack *> p_track;
 };
 
-
-ITrack* RTSPServer::createTrack()
+RTSPServer::RTSPServer(ITrack* track)
 {
-	ITrack *track = new ITrack();
-	return track;
-
+	p_track.push_back(track);
 }
 
-class H264RTSPServer :public RTSPServer {
-public:
-	typedef RTSPServer super;
-	ITrack* createTrack() {
-		H264 *h264 = new H264();
-		h264->setBitrate(12);
-		cout << h264->getData() << endl;
-		return h264;
-	}
-};
+void RTSPServer::createTrack(ITrack* track)
+{
+	p_track.push_back(track);
+}
 
-class AACRTSPServer :public RTSPServer {
-public:
-	typedef RTSPServer super;
-	ITrack* createTrack() {
-		AAC *aac = new AAC();
-		cout << aac->getData() << endl;
-		return aac;
-	}
-};
 
-class XMLRTSPServer :public RTSPServer {
-public:
-	typedef RTSPServer super;
-	ITrack* createTrack() {
-		XML *xml = new XML();
-		cout << xml->getData() << endl;
-		return xml;
+void RTSPServer::showTrack()
+{
+	vector<ITrack *>::iterator iter = p_track.begin();
+	for (; iter != p_track.end(); ++iter)
+	{
+		ITrack *p_track = *iter;
+		cout << p_track->getData() << endl;
 	}
-};
-
+}
 
 int main(int argc, char* argv[])
 {
-
-	RTSPServer *rtspServer = new H264RTSPServer();
-	rtspServer->createTrack();
-
-	rtspServer = new AACRTSPServer();
-	rtspServer->createTrack();
-
-	rtspServer = new XMLRTSPServer();
-	rtspServer->createTrack();
-
-
+	RTSPServer *rtspServer = new RTSPServer(new AAC());
+	rtspServer->createTrack(new H264());
+	rtspServer->createTrack(new H264());
+	rtspServer->createTrack(new XML());
+	rtspServer->showTrack();
 
 	system("pause");
 	return 0;
