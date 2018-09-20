@@ -8,14 +8,17 @@ using namespace std;
 class ITrack
 {
 public:
-	virtual string getData() = 0;
+	virtual string getData() { return ""; };
 };
 
 class H264 :public ITrack
 {
 public:
 	string getData() { return "get h264 data"; }
-	void setBitrate(int bitrate) { m_bitrate = bitrate; }
+	void setBitrate(int bitrate) {
+		m_bitrate = bitrate;
+		cout << "set bitrate: " << m_bitrate << endl;
+	}
 
 private:
 	int m_bitrate;
@@ -41,38 +44,49 @@ class RTSPServer
 {
 public:
 	RTSPServer(ITrack* track);
-	void createTrack(ITrack* track);
-	void showTrack();
+	~RTSPServer();
+	virtual ITrack* createTrack(ITrack* track);
+	virtual void showTrack();
 
 private:
-	vector<ITrack *> p_track;
+	ITrack * m_track;
+	vector<ITrack *> trackList;
 };
 
 RTSPServer::RTSPServer(ITrack* track)
 {
-	p_track.push_back(track);
+	m_track = track;
+	trackList.push_back(track);
 }
 
-void RTSPServer::createTrack(ITrack* track)
+RTSPServer::~RTSPServer()
 {
-	p_track.push_back(track);
+	delete m_track;
+
+}
+
+ITrack* RTSPServer::createTrack(ITrack* track)
+{
+	trackList.push_back(track);
+	return track;
 }
 
 
 void RTSPServer::showTrack()
 {
-	vector<ITrack *>::iterator iter = p_track.begin();
-	for (; iter != p_track.end(); ++iter)
+
+	for (const auto& track : trackList)
 	{
-		ITrack *p_track = *iter;
-		cout << p_track->getData() << endl;
+		cout << track->getData() << endl;
 	}
 }
 
 int main(int argc, char* argv[])
 {
+	ITrack* track;
 	RTSPServer *rtspServer = new RTSPServer(new AAC());
-	rtspServer->createTrack(new H264());
+	track = rtspServer->createTrack(new H264());
+	dynamic_cast<H264*>(track)->setBitrate(12);
 	rtspServer->createTrack(new H264());
 	rtspServer->createTrack(new XML());
 	rtspServer->showTrack();
