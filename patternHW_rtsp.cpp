@@ -49,25 +49,23 @@ public:
 	virtual void showTrack();
 
 private:
-	vector<ITrack *> trackList;
+	vector<shared_ptr<ITrack*>> m_spTrackList;
 };
 
 RTSPServer::RTSPServer(ITrack* track)
 {
-	trackList.push_back(track);
+
+	m_spTrackList.push_back(make_shared<ITrack*>(track));
 }
 
 RTSPServer::~RTSPServer()
 {
-	for (const auto& track : trackList) {
-		delete track;
-	}
 
 }
 
 ITrack* RTSPServer::createTrack(ITrack* track)
 {
-	trackList.push_back(track);
+	m_spTrackList.push_back(make_shared<ITrack*>(track));
 	return track;
 }
 
@@ -75,9 +73,10 @@ ITrack* RTSPServer::createTrack(ITrack* track)
 void RTSPServer::showTrack()
 {
 
-	for (const auto& track : trackList)
+	for (const auto& track : m_spTrackList)
 	{
-		cout << track->getData() << endl;
+		const auto& s = *track;
+		cout << s->getData() << endl;
 	}
 }
 
