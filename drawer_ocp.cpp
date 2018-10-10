@@ -1,40 +1,58 @@
+#include <string>  
+#include <iostream>
+#include <vector>
 
-class Solution {
-public:
-    vector<string> generateParenthesis(int n) {
-        vector<string> combinations;
-        generateAll(new char[2*n], 0, combinations, 2*n);
-        return combinations;
-    }
-    
-    void generateAll(char* current, int pos, vector<string> &combinations, int sizeRes)
-    {
+using namespace std;
 
-        if(sizeRes == pos)
-        {
-            if(valid(current, sizeRes))
-            {               
-                combinations.push_back(current);
-            }          
-            
+
+class Tool {
+    public:
+        virtual void draw() = 0;
+};
+
+class Pencil : public Tool {
+    public:
+        void draw() {
+            cout << "Pencil Draw" << endl;
         }
-        else
-        {
-            current[pos] = '(';
-            generateAll(current, pos+1, combinations, sizeRes);
-            current[pos] = ')';
-            generateAll(current, pos+1, combinations, sizeRes);
-        }
-    }
-    bool valid(char* current, int sizeRes)
+
+};
+
+class Brush : public Tool
+{
+  public:
+    void draw()
     {
-        int balance = 0;
-        for(unsigned int i = 0; i < strlen(current); i++)
-        {
-            if(current[i] == '(') balance++;
-            else balance--;
-            if(balance < 0) return false;
-        }
-        return (balance==0);   
+        cout << "Brush Draw" << endl;
     }
 };
+
+class Panel {
+    public:
+        void addTool(Tool *tool) {
+            toolList.push_back(tool);
+        }
+
+        void paint() {
+            for (auto tool: toolList) {
+                tool->draw();
+            }
+        }
+
+    private:
+        vector<Tool*> toolList;
+
+};
+
+int main(int argc, char* argv[])
+{
+    Panel *panel = new Panel(); 
+    Tool *brush = new Brush();
+	Tool *pencil = new Pencil();
+    
+    panel->addTool(pencil);
+    panel->addTool(brush);
+    panel->paint();
+
+	return 0;
+}
